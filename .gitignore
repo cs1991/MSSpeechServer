@@ -3,3 +3,5 @@
 *.xml
 bin/
 libs/
+.vs
+MSSpeechServer-net46-src/MSSpeechServer/obj/

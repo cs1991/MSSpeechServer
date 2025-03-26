@@ -1,7 +1,7 @@
 FROM scottyhardy/docker-wine:stable-8.0.2
 
 ###############################################
-MAINTAINER James Chan <james@sctmes.com>
+MAINTAINER cs <562387089@qq.com>
 
 EXPOSE 8080
 
@@ -23,16 +23,20 @@ RUN apt-get update && \
     apt-get remove -y python3-crypto 
     
 COPY bash/auto_xvfb.sh /usr/bin/auto_xvfb
-
-RUN mv /bin/sh /bin/sh.old && \
-    ln -s /bin/bash /bin/sh && \
-    bash /usr/bin/auto_xvfb && \
-    winetricks unattended win8 nocrashdialog msxml3 dotnet46 
-
-
 COPY libs/ /wine32/drive_c/libs
 COPY bin/ /wine32/drive_c/bin
 COPY bash/docker_entrypoint.sh /usr/bin/entrypoint
+
+RUN [ ! -f /bin/sh ] || mv /bin/sh /bin/sh.old && ln -s /bin/bash /bin/sh
+RUN test -f /usr/bin/auto_xvfb
+RUN bash /usr/bin/auto_xvfb || echo "auto_xvfb 不存在，跳过"
+
+RUN winetricks win8 nocrashdialog
+#RUN wine /wine32/drive_c/libs/wine/dotnet46.exe /q
+#RUN wine msiexec /i /wine32/drive_c/libs/wine/msxml3.msi /q
+RUN winetricks --unattended win8 nocrashdialog msxml3 dotnet46
+
+
 
 RUN cp /wine32/drive_c/libs/tini/tini /tini && \
     chmod +x /tini && \

@@ -31,3 +31,13 @@ C:\Users\James\Desktop\MSSpeechServer\MSSpeechServer\MSSpeechServer-net46-src\MS
 C:\Users\James\Desktop\MSSpeechServer\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.csproj.CopyComplete
 C:\Users\James\Desktop\MSSpeechServer\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.exe
 C:\Users\James\Desktop\MSSpeechServer\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.pdb
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.csproj.AssemblyReference.cache
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.csproj.CoreCompileInputs.cache
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.pdb
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\bin\Debug\MSSpeechServer.exe.config
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\bin\Debug\MSSpeechServer.exe
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\bin\Debug\MSSpeechServer.pdb
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\bin\Debug\Newtonsoft.Json.dll
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\bin\Debug\Newtonsoft.Json.xml
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeech.F4FB9385.Up2Date
+F:\code\sr\devices\gzsz\MSSpeechServer\MSSpeechServer-net46-src\MSSpeechServer\obj\Debug\MSSpeechServer.exe

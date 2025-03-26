@@ -1,0 +1,15 @@
+version: '3'
+services:
+  msspeechserver:
+    image: msspeechserver:V1.0.3
+    ports:
+      - "28080:8080" # 映射端口
+    volumes:
+      - ./debug:/wine32/drive_c/debug # 挂载卷
+    privileged: true # 使用特权模式
+
+
+    
+  
+
+

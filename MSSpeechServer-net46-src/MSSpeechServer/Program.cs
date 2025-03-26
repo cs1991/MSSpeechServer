@@ -7,7 +7,6 @@ using System.Threading;
 using System.IO;
 using Newtonsoft.Json;
 using Microsoft.Speech.Synthesis;
-
 namespace MSSpeechServer
 {
     internal class Program
@@ -29,7 +28,7 @@ namespace MSSpeechServer
                     new Route()
                     {
                         Callable = SetTTSHandler,
-                        UrlRegex = "^\\/SetTTS(?:\\?.*)?$",
+                        UrlRegex = "^\\/GetTts(?:\\?.*)?$",
                         Method = "GET"
                     }
                 };
@@ -58,7 +57,10 @@ namespace MSSpeechServer
                     ContentAsUTF8 = jsonResponse,
                     ReasonPhrase = "OK",
                     StatusCode = "200",
-                    Headers = { ["Content-Type"] = "application/json" }
+                    Headers = { ["Content-Type"] = "application/json",
+                                ["Access-Control-Allow-Origin"] = "*",
+                                ["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS",
+                                ["Access-Control-Allow-Headers"] = "Content-Type, Authorization", }
                 };
             }
 
@@ -71,7 +73,9 @@ namespace MSSpeechServer
                 // 初始化变量
                 string text = null;
                 string voiceName = null;
-
+                float rate = 0.0f;
+                float pitch = 1.0f;
+                string cantonese = "0";
                 // 手动分割参数和值
                 string[] parts = decodedQueryString.Split('?');
                 if (parts.Length > 1)
@@ -95,6 +99,23 @@ namespace MSSpeechServer
                             {
                                 voiceName = value;
                             }
+                            else if (key.Equals("rate")) 
+                            {
+                                if (float.TryParse(value, out float num)) {
+                                    rate = num;
+                                }
+                            }
+                            else if (key.Equals("pitch"))
+                            {
+                                if (float.TryParse(value, out float num))
+                                {
+                                    pitch = num;
+                                }
+                            }
+                            else if (key.Equals("cantonese"))
+                            {
+                                cantonese = value;
+                            }
                         }
                     }
                 }
@@ -110,7 +131,10 @@ namespace MSSpeechServer
                         ContentAsUTF8 = jsonResponse,
                         ReasonPhrase = "Bad Request",
                         StatusCode = "400",
-                        Headers = { ["Content-Type"] = "application/json" }
+                        Headers = { ["Content-Type"] = "application/json",
+                                ["Access-Control-Allow-Origin"] = "*",
+                                ["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS",
+                                ["Access-Control-Allow-Headers"] = "Content-Type, Authorization", }
                     };
                 }
 
@@ -128,7 +152,10 @@ namespace MSSpeechServer
                             ContentAsUTF8 = jsonResponse,
                             ReasonPhrase = "Bad Request",
                             StatusCode = "400",
-                            Headers = { ["Content-Type"] = "application/json" }
+                            Headers = { ["Content-Type"] = "application/json",
+                                ["Access-Control-Allow-Origin"] = "*",
+                                ["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS",
+                                ["Access-Control-Allow-Headers"] = "Content-Type, Authorization", }
                         };
                     }
                     else
@@ -136,8 +163,16 @@ namespace MSSpeechServer
 
                         // 如果设置语音库
                         bool makeSpeak = true;
-
-                        if (!string.IsNullOrWhiteSpace(voiceName))
+                        string finalVoiceName = "";
+                        string lan = "zh-CN";
+                        if (!string.IsNullOrWhiteSpace(cantonese) && cantonese == "1")
+                        {
+                            voiceName = "Microsoft Server Speech Text to Speech Voice (zh-HK, HunYee)";
+                            finalVoiceName = voiceName;
+                            synth.SelectVoice(voiceName);
+                            lan = "zh-HK";
+                        }
+                        else if (!string.IsNullOrWhiteSpace(voiceName))
                         {
                             bool voiceFound = false;
                             foreach (InstalledVoice voice in voices)
@@ -147,7 +182,7 @@ namespace MSSpeechServer
                                 {
                                     synth.SelectVoice(info.Name);
                                     voiceFound = true;
-
+                                    finalVoiceName = info.Name;
                                     break;
                                 }
                             }
@@ -162,7 +197,10 @@ namespace MSSpeechServer
                                     ContentAsUTF8 = jsonResponse,
                                     ReasonPhrase = "Bad Request",
                                     StatusCode = "400",
-                                    Headers = { ["Content-Type"] = "application/json" }
+                                    Headers = { ["Content-Type"] = "application/json" ,
+                                                ["Access-Control-Allow-Origin"] = "*",
+                                                ["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS",
+                                                ["Access-Control-Allow-Headers"] = "Content-Type, Authorization", }
                                 };
                             }
                         }
@@ -171,21 +209,55 @@ namespace MSSpeechServer
                             // 默认选择第一个语音
                             VoiceInfo info = voices[0].VoiceInfo;
                             synth.SelectVoice(info.Name);
+                            finalVoiceName = info.Name;
                         }
-
+                        if (!string.IsNullOrWhiteSpace(cantonese) && cantonese == "1")
+                        {
+                            lan = "zh-HK";
+                        }
+                        else {
+                            if (finalVoiceName.Contains("zh-HK"))
+                            {
+                                lan = "zh-HK";
+                            }
+                            else {
+                                lan = "zh-CN";
+                            }
+                        }
                         if (makeSpeak)
                         {
                             // 将文本转换为语音并保存为 WAV 格式的字节数组
                             var memoryStream = new MemoryStream();
                             synth.SetOutputToWaveStream(memoryStream);
-                            synth.Speak(text);
+
+                            synth.Rate = (int)(rate * 10);
+
+                            string ssmlTemplate = @"
+<speak version=""1.0"" xmlns=""http://www.w3.org/2001/10/synthesis"" xml:lang=""{4}"">
+    <voice name=""{0}"">
+        <prosody rate=""{1}%"" pitch=""{2}%"" volume=""loud"">
+            {3}
+        </prosody>
+    </voice>
+</speak>";
+                            string srate = rate > 0 ? "+" + ((int)(rate * 100)).ToString():((int)(rate * 10)).ToString();
+                            string spitch = pitch > 0 ? "+" + ((int)(pitch * 100)).ToString(): ((int)(pitch * 10)).ToString();
+                            //string text = "你好，这里是微软语音合成。";
+
+                            string ssml = string.Format(ssmlTemplate, finalVoiceName, srate, spitch, text, lan);
+
+                            //synth.Speak(text);
+                            synth.SpeakSsml(ssml);
                             memoryStream.Position = 0;
 
                             // 构造响应
                             return new HttpResponse
                             {
                                 Content = memoryStream.ToArray(),
-                                Headers = { ["Content-Type"] = "audio/wav" },
+                                Headers = { ["Content-Type"] = "audio/wav" ,
+                                        ["Access-Control-Allow-Origin"] = "*",
+                                        ["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS",
+                                        ["Access-Control-Allow-Headers"] = "Content-Type, Authorization", },
                                 StatusCode = "200",
                                 ReasonPhrase = "OK"
                             };
